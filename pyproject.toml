@@ -1,0 +1,21 @@
+[project]
+name = "gmail-mcp-server"
+version = "0.1.0"
+description = "Read-only MCP server for the Gmail API"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=2.0.0",
+    "google-api-python-client>=2.150.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.2.0",
+]
+
+[project.scripts]
+gmail-mcp = "gmail_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["gmail_mcp"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

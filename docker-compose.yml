@@ -1,0 +1,13 @@
+services:
+  gmail-mcp:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - GMAIL_MCP_CREDENTIALS=/app/secrets/credentials.json
+      - GMAIL_MCP_TOKEN=/app/secrets/token.json
+      - GMAIL_MCP_OAUTH_STATE=/app/secrets/oauth_state.json
+    volumes:
+      - ./secrets:/app/secrets
+    ports:
+      - "8811:8811"
