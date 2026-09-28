@@ -83,18 +83,14 @@ server for exactly that case: a standard authorization-code + PKCE flow, gated b
 consent screen that asks for a passphrase you set yourself, so a token is only ever issued after
 you personally approve it.
 
-1. Copy `.env.example` to `.env` and fill it in (see the comments in that file).
-2. Put this behind a reverse proxy that terminates HTTPS (Caddy, Nginx, Traefik, your load
-   balancer of choice) and point a real domain at it.
-3. `docker compose up -d --build`
-4. In your MCP client, add a custom connector:
-   - Server URL: `https://your-domain/mcp`
-   - Authentication: OAuth, with your own client ID (from `.env`), no client secret, token
-     endpoint auth method `none`
-   - It should auto-discover the authorization/token endpoints from
-     `https://your-domain/.well-known/oauth-authorization-server`
-5. On first connect you'll land on a small consent page on your own server, enter the
-   passphrase from `.env` to approve.
+**Full deployment instructions:** see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+Quick steps:
+1. Set up a reverse proxy (Caddy or Nginx) with HTTPS
+2. Copy `.env.example` to `.env` and fill it in
+3. Run `python authorize.py` once to generate `secrets/token.json`
+4. `docker compose up -d --build`
+5. In your MCP client, add a custom connector with your domain
 
 Access tokens are short-lived (1 hour) with long-lived refresh tokens, both persisted to
 `secrets/oauth_state.json` so a container restart doesn't force re-authorization.
@@ -113,6 +109,8 @@ Access tokens are short-lived (1 hour) with long-lived refresh tokens, both pers
   Anyone who reaches your deployed instance and gets past the consent passphrase reads and
   drafts as *you*, not as themselves, don't share the deployed URL and passphrase together.
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for production hardening recommendations.
+
 ## Project layout
 
 ```
@@ -125,6 +123,11 @@ gmail_mcp/
   consent.py           The passphrase-gated consent page
 authorize.py           One-time local script to obtain secrets/token.json
 ```
+
+## Documentation
+
+- [DEPLOYMENT.md](DEPLOYMENT.md) — Full guide to deploying on EC2, DigitalOcean, etc. with HTTPS and ChatGPT integration
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Common errors and solutions (OAuth failures, token issues, etc.)
 
 ## License
 
