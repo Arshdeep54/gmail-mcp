@@ -5,6 +5,11 @@
     "dark": "./logo.png"
   },
   "favicon": "./logo.png",
+  "og": {
+    "title": "gmail-mcp-server — Free Gmail for AI",
+    "description": "Self-hosted Gmail MCP server. Works with Claude Code, ChatGPT, and more. Open source.",
+    "image": "./og-image.png"
+  },
   "colors": {
     "primary": "#7C3AED",
     "accent": "#EC4899"
