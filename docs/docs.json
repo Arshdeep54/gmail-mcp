@@ -1,11 +1,17 @@
 {
   "name": "gmail-mcp-server",
+  "logo": {
+    "light": "./logo.png",
+    "dark": "./logo.png"
+  },
   "colors": {
-    "primary": "#4285F4"
+    "primary": "#7C3AED",
+    "accent": "#EC4899"
   },
   "background": {
     "color": {
-      "dark": "#0b0d10"
+      "light": "#fafafa",
+      "dark": "#0f0a1a"
     }
   },
   "navigation": {

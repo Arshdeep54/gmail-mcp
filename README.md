@@ -3,6 +3,10 @@
   <img alt="license" src="https://img.shields.io/badge/license-MIT-blue">
 </p>
 
+<p align="center">
+  <img alt="gmail-mcp-server logo" src="docs/public/logo.png" width="320">
+</p>
+
 # gmail-mcp-server
 
 A self-hosted [MCP](https://modelcontextprotocol.io) server for Gmail, built on the official
