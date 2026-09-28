@@ -45,7 +45,7 @@ and hit send themselves.
 Requirements: Python 3.10+, a Google Cloud project with the Gmail API enabled.
 
 ```bash
-git clone https://github.com/<you>/gmail-mcp-server.git
+git clone https://github.com/Arshdeep54/gmail-mcp-server.git
 cd gmail-mcp-server
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
@@ -130,8 +130,14 @@ authorize.py           One-time local script to obtain secrets/token.json
 
 ## Documentation
 
+Full docs: **[gmail-mcp.hiesenbug.dev](https://gmail-mcp.hiesenbug.dev)**
+
 - [DEPLOYMENT.md](DEPLOYMENT.md) — Full guide to deploying on EC2, DigitalOcean, etc. with HTTPS and ChatGPT integration
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Common errors and solutions (OAuth failures, token issues, etc.)
+
+## Author
+
+Built by [Arshdeep54](https://github.com/Arshdeep54)
 
 ## License
 
