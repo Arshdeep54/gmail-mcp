@@ -45,8 +45,8 @@ and hit send themselves.
 Requirements: Python 3.10+, a Google Cloud project with the Gmail API enabled.
 
 ```bash
-git clone https://github.com/Arshdeep54/gmail-mcp-server.git
-cd gmail-mcp-server
+git clone https://github.com/Arshdeep54/gmail-mcp.git
+cd gmail-mcp
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
