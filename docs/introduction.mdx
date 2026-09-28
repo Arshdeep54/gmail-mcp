@@ -1,0 +1,39 @@
+---
+title: Introduction
+description: Self-hosted MCP server for Gmail built on the official API. Free alternative to ChatGPT's ₹2000/month Gmail connector.
+---
+
+# gmail-mcp-server
+
+Self-hosted MCP server for Gmail, built on the official Gmail API.
+
+## Why
+
+Most "Gmail for AI" integrations are either a paid SaaS connector or require handing a third party your inbox. This is neither: it's a small server you run yourself, talking directly to Google's API with your own OAuth client.
+
+ChatGPT's Gmail connector costs ₹2000/month. This alternative is **free, open-source, and yours to control**.
+
+## What It Does
+
+- **Search messages** with Gmail's query syntax (`from:`, `is:unread`, `after:`, ...)
+- **Read full messages** with headers, body, and attachment metadata
+- **Browse threads** to see full conversations
+- **Create drafts** (never sends—you approve in Gmail first)
+- **List labels** with message/thread counts
+
+## Security First
+
+- Only requests `gmail.readonly` and `gmail.compose`—nothing broader
+- Your OAuth token and email data **stay on your machine**
+- No third-party relay or data leaving your infrastructure
+- No send, modify, or delete capability—drafts are inert until you send them
+- Single-tenant: authenticates as one Gmail account (yours)
+
+## How It Works
+
+Works with any MCP-compatible client:
+- **Claude Code** over local stdio (no network exposure)
+- **ChatGPT** via HTTP with built-in OAuth 2.1 server
+- **Other MCP clients** (Cursor, other editors, etc.)
+
+Pick your setup: local for privacy, hosted for ChatGPT integration.

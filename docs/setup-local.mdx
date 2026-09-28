@@ -1,0 +1,56 @@
+---
+title: Local Setup (Claude Code)
+description: Run gmail-mcp-server locally for private access with zero network exposure.
+---
+
+# Local Setup (Claude Code)
+
+Run gmail-mcp-server locally on your machine for private, zero-network-exposure access.
+
+## Why Local?
+
+- **Private:** No one else can access your Gmail
+- **Fast:** No network latency
+- **Simple:** No reverse proxy, no domains, no HTTPS certificates
+- **Perfect for:** Solo use, development, keeping secrets local
+
+## Installation
+
+Follow [Quick Start](quickstart) to install and authorize.
+
+## Configure Claude Code
+
+Add the server to Claude Code's MCP config:
+
+```bash
+claude mcp add gmail -- python -m gmail_mcp.server
+```
+
+Or manually edit `~/.claude/settings.json`:
+```json
+{
+  "mcpServers": {
+    "gmail": {
+      "command": "python",
+      "args": ["-m", "gmail_mcp.server"],
+      "cwd": "/full/path/to/gmail-mcp-server"
+    }
+  }
+}
+```
+
+Replace `/full/path/to/gmail-mcp-server` with your actual path.
+
+## Use It
+
+Restart Claude Code → Gmail tools appear automatically.
+
+Try: `Search for unread emails from my boss`
+
+## No OAuth Needed
+
+Local mode doesn't use the OAuth server at all. Your token stays in `secrets/token.json`, Claude Code reads it directly via stdio.
+
+---
+
+**Ready to share access with ChatGPT?** See [Cloud Deployment](setup-deployment).

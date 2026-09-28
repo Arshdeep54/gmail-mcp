@@ -1,0 +1,54 @@
+---
+title: Quick Start
+description: Get gmail-mcp-server running in 5 minutes with Claude Code.
+---
+
+# Quick Start
+
+Get gmail-mcp-server running in 5 minutes.
+
+## Requirements
+
+- Python 3.10+
+- A Google Cloud project with Gmail API enabled
+- Claude Code, ChatGPT, or another MCP client
+
+## 1. Get Your Google Credentials
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a project or select existing one
+3. Enable the **Gmail API**: Search "Gmail" in APIs & Services → Library → Enable
+4. Create OAuth client: APIs & Services → Credentials → Create Credentials → **OAuth client ID** → Desktop app
+5. Download the JSON file as `secrets/credentials.json`
+
+## 2. Clone & Install
+
+```bash
+git clone https://github.com/Arshdeep54/gmail-mcp.git
+cd gmail-mcp-server
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+pip install -e .
+```
+
+## 3. Authorize Once
+
+```bash
+python authorize.py
+```
+
+This opens your browser → approve → saves `secrets/token.json`
+
+## 4. Add to Claude Code
+
+Edit `~/.claude/settings.json` or use:
+
+```bash
+claude mcp add gmail -- python -m gmail_mcp.server
+```
+
+## Done!
+
+You now have Gmail tools in Claude Code. Search messages, read threads, create drafts—all from Claude.
+
+**Next:** Ready to deploy to ChatGPT? See [Cloud Deployment](setup-deployment).

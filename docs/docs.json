@@ -1,0 +1,35 @@
+{
+  "name": "gmail-mcp-server",
+  "colors": {
+    "primary": "#4285F4"
+  },
+  "background": {
+    "color": {
+      "dark": "#0b0d10"
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Setup Guides",
+        "pages": [
+          "setup-local",
+          "setup-deployment"
+        ]
+      },
+      {
+        "group": "Help",
+        "pages": [
+          "troubleshooting"
+        ]
+      }
+    ]
+  }
+}

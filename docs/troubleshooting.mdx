@@ -1,0 +1,171 @@
+---
+title: Troubleshooting
+description: Solutions for OAuth, deployment, Docker, and MCP client issues.
+---
+
+# Troubleshooting
+
+Solutions to common issues.
+
+## Setup Problems
+
+### "credentials.json not found"
+
+Your Google OAuth client file is missing.
+
+**Solution:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable Gmail API: APIs & Services → Library → search "Gmail" → Enable
+3. Create OAuth client: APIs & Services → Credentials → Create Credentials → OAuth client ID → Desktop app
+4. Download JSON → save as `secrets/credentials.json`
+
+### "Access denied" during authorization
+
+Google blocked your app because it's in Testing mode.
+
+**Solution:**
+1. In Google Cloud Console, go to APIs & Services → OAuth consent screen
+2. Under "Test users," add your Gmail address
+3. Run `python authorize.py` again
+
+### "Port already in use"
+
+Your system's port 8080 is taken.
+
+**Solution:**
+The script picks a random port automatically. If it fails, find the culprit:
+```bash
+lsof -i :8080
+kill -9 <PID>
+python authorize.py  # try again
+```
+
+### Token expired or invalid
+
+OAuth tokens expire. Re-authorize:
+```bash
+python authorize.py
+```
+
+This creates a fresh `secrets/token.json`.
+
+## Deployment Issues
+
+### "Connection refused" from ChatGPT
+
+ChatGPT can't reach your server.
+
+**Checklist:**
+- Is your reverse proxy (Caddy/Nginx) running?
+- Does DNS resolve your domain correctly?
+- Is the HTTPS certificate valid?
+- Are ports 80/443 open in your firewall?
+- Is Docker container running? `docker compose ps`
+
+Test:
+```bash
+curl -I https://your-domain/mcp
+```
+
+### Container won't start
+
+**Check logs:**
+```bash
+docker compose logs gmail-mcp
+```
+
+**Common causes:**
+- Missing `.env` file
+- Missing `secrets/credentials.json`
+- Port 8811 already in use
+- Bad permissions on `secrets/` directory
+
+**Fix permissions:**
+```bash
+chmod 755 secrets/
+docker compose down && docker compose up -d --build
+```
+
+### "OAuth passphrase incorrect"
+
+You entered wrong passphrase or it changed.
+
+**Solution:**
+1. Check `.env` for `GMAIL_MCP_OAUTH_PASSPHRASE`
+2. Restart container: `docker compose restart gmail-mcp`
+3. If you forgot it, generate new:
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(24))"
+   ```
+   Update `.env` and restart.
+
+### "OAuth client ID mismatch"
+
+Your ChatGPT connector client ID doesn't match `.env`.
+
+**Solution:**
+1. In `.env`, find `GMAIL_MCP_OAUTH_CLIENT_ID`
+2. In ChatGPT connector settings, paste this exact ID
+3. Restart: `docker compose restart gmail-mcp`
+
+## Claude Code Issues
+
+### Gmail tools don't appear in Claude Code
+
+**Checklist:**
+- Is server running? `python -m gmail_mcp.server`
+- Is it in Claude Code settings? Check `~/.claude/settings.json`
+- Did you restart Claude Code after adding it?
+
+**Local setup syntax:**
+```json
+{
+  "mcpServers": {
+    "gmail": {
+      "command": "python",
+      "args": ["-m", "gmail_mcp.server"],
+      "cwd": "/full/path/to/gmail-mcp-server"
+    }
+  }
+}
+```
+
+### "gmailSearchMessages: Invalid OAuth token"
+
+Your token expired (local mode).
+
+**Solution:**
+```bash
+python authorize.py
+```
+
+Restart Claude Code.
+
+### Slow responses
+
+Gmail's API is the bottleneck, not this server. Large mailboxes take time.
+
+**Speed up:**
+- Use specific search filters: `is:unread from:boss` instead of broad queries
+- Search recent messages: `after:2024/01/01`
+
+## Debug Mode
+
+See detailed logs:
+
+**Local:**
+```bash
+LOGLEVEL=debug python -m gmail_mcp.server
+```
+
+**Docker:**
+```bash
+docker compose exec gmail-mcp sh
+LOGLEVEL=debug python -m gmail_mcp.server
+```
+
+Prints all API calls and token refreshes—useful for tracking auth issues.
+
+---
+
+**Still stuck?** Check your `.env` file exists, `secrets/credentials.json` is readable, and your Google account is added as a test user.
