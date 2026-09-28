@@ -4,6 +4,7 @@
     "light": "./logo.png",
     "dark": "./logo.png"
   },
+  "favicon": "./logo.png",
   "colors": {
     "primary": "#7C3AED",
     "accent": "#EC4899"
