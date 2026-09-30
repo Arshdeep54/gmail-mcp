@@ -230,3 +230,28 @@ def list_labels() -> list[dict[str, Any]]:
             }
         )
     return labels
+
+
+def _label_ids_by_name(service, names: list[str]) -> list[str]:
+    if not names:
+        return []
+    resp = service.users().labels().list(userId="me").execute(num_retries=3)
+    by_name = {l["name"]: l["id"] for l in resp.get("labels", [])}
+    missing = [n for n in names if n not in by_name]
+    if missing:
+        raise ValueError(f"No such label(s): {', '.join(missing)}")
+    return [by_name[n] for n in names]
+
+
+def modify_labels(
+    message_id: str, add_labels: list[str] | None = None, remove_labels: list[str] | None = None
+) -> dict[str, Any]:
+    """Add/remove labels (by name) on a message. Works on drafts too, via the draft's
+    messageId, since a draft is just a message with the DRAFT label."""
+    service = get_service()
+    body = {
+        "addLabelIds": _label_ids_by_name(service, add_labels or []),
+        "removeLabelIds": _label_ids_by_name(service, remove_labels or []),
+    }
+    msg = service.users().messages().modify(userId="me", id=message_id, body=body).execute(num_retries=3)
+    return {"id": msg["id"], "labelIds": msg.get("labelIds", [])}

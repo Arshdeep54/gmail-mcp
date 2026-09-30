@@ -110,6 +110,17 @@ def gmail_list_labels() -> list[dict]:
     return gmail_client.list_labels()
 
 
+@mcp.tool()
+@_logged
+def gmail_modify_labels(
+    message_id: str, add_labels: list[str] | None = None, remove_labels: list[str] | None = None
+) -> dict:
+    """Add or remove labels (by name, e.g. 'outreach') on a message. Works on drafts too:
+    pass the draft's messageId (from gmail_create_draft), since a draft is a message with
+    the DRAFT label. Labels must already exist; check gmail_list_labels first."""
+    return gmail_client.modify_labels(message_id, add_labels, remove_labels)
+
+
 def main() -> None:
     mcp.run()
 
