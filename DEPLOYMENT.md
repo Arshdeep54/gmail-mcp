@@ -192,6 +192,16 @@ When you first use the connector, you'll see the consent page asking for your pa
 
 ## Maintenance
 
+### Keeping the Gmail token alive (after publishing)
+
+Once your OAuth consent screen is out of **Testing** mode (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#token-expired-or-invalid)), Google only revokes a refresh token if it goes unused for 6 months. If you expect gaps that long between real usage, a monthly cron job that touches the Gmail API keeps it alive — this is a safeguard for the idle-revocation case, it does nothing for Testing-mode's hard 7-day expiry.
+
+Add to the server's crontab (`crontab -e`):
+```cron
+0 4 1 * * docker exec gmail-mcp-gmail-mcp-1 python -c "from gmail_mcp.gmail_client import get_service; get_service().users().getProfile(userId='me').execute()" >> /home/ubuntu/gmail-mcp/keepalive.log 2>&1
+```
+This runs at 4am on the 1st of each month, makes one cheap authenticated call (`getProfile`), and forces the refresh-token-backed access token to renew.
+
 ### Updating the Server
 
 ```bash
@@ -213,10 +223,14 @@ docker compose restart gmail-mcp
 
 ### Updating `.env`
 
-After editing `.env`, restart the container:
+`docker compose restart` does **not** reload `.env` — it restarts the existing container with the environment it was created with. After editing `.env`, recreate the container instead:
 ```bash
-docker compose restart gmail-mcp
+docker compose up -d gmail-mcp
 ```
+
+### Updating `secrets/token.json`
+
+A plain `docker compose restart gmail-mcp` is enough here, since `secrets/` is a bind-mounted volume the app reads from at call time, not baked-in env.
 
 ## Troubleshooting Deployment
 
@@ -238,12 +252,23 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues like:
 
 ## Monitoring
 
-For production use, consider:
-- Monitoring that the container is running: `docker-health-check` or similar
-- Logs aggregation: Syslog, CloudWatch, or a log service
-- Rate limiting on your reverse proxy if exposed to untrusted clients
+The server logs every tool call and every auth event (token refresh, refresh failure) to stdout — `docker compose logs gmail-mcp -f` shows real-time activity. Set `LOGLEVEL=debug` in `.env` for more detail. Logs are capped at 10MB × 3 files via `docker-compose.yml` so they won't fill the disk.
 
-Example with Caddy's built-in limits:
+It also exposes `GET /health`, which makes a real `getProfile` call (not just "is the process up") — this is what catches the token-expiry issue in [TROUBLESHOOTING.md](TROUBLESHOOTING.md#token-expired-or-invalid) before your MCP client hits a confusing empty result:
+```bash
+curl https://your-domain/health
+# {"status": "ok"}                          -> token + API both fine
+# {"status": "error", "detail": "..."} 503   -> re-authorize (see TROUBLESHOOTING.md)
+```
+
+**Get paged when it breaks**, for free, with [healthchecks.io](https://healthchecks.io) or [UptimeRobot](https://uptimerobot.com):
+1. Create a new HTTP(S) monitor pointed at `https://your-domain/health`
+2. Set the check interval to 5 minutes and "expected status" to `200`
+3. Add your email (or Slack/Discord webhook) as the alert contact
+
+That's it — no code or server changes needed, the endpoint already exists.
+
+Rate limiting on your reverse proxy is still worth adding if exposed to untrusted clients. Example with Caddy's built-in limits:
 ```caddy
 gmail-mcp.example.com {
     rate_limit * 10r/s

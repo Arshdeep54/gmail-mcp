@@ -1,9 +1,12 @@
+import logging
 import os
 from pathlib import Path
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+
+logger = logging.getLogger("gmail_mcp")
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -20,10 +23,16 @@ def load_credentials() -> Credentials:
         creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
 
     if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-        TOKEN_PATH.write_text(creds.to_json())
+        try:
+            creds.refresh(Request())
+            TOKEN_PATH.write_text(creds.to_json())
+            logger.info("token_refreshed")
+        except Exception:
+            logger.exception("token_refresh_failed")
+            raise
 
     if not creds or not creds.valid:
+        logger.error("no_valid_credentials path=%s", TOKEN_PATH)
         raise RuntimeError(
             f"No valid credentials at {TOKEN_PATH}. Run `python authorize.py` first."
         )

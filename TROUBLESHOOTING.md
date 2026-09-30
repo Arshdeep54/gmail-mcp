@@ -46,14 +46,23 @@ python authorize.py
 
 ### Token expired or invalid
 
-**Problem:** "No valid credentials" error when running the server.
+**Problem:** "No valid credentials" error, or the server logs `google.auth.exceptions.RefreshError: invalid_grant: Token has been expired or revoked.`
 
-**Solution:** Your OAuth token has expired (tokens last ~7 days without refresh). Re-authorize:
+**Cause:** If your Google Cloud OAuth consent screen is still in **Testing** mode, Google hard-expires refresh tokens after 7 days, no matter how often they're used. This is the most common cause and it will keep happening on a 7-day cycle until you publish the app.
+
+**Immediate fix:** Re-authorize to get a working token again:
 ```bash
-python authorize.py
+GMAIL_MCP_CREDENTIALS=secrets/credentials.json GMAIL_MCP_TOKEN=secrets/token.json python authorize.py
 ```
+Then copy the new `secrets/token.json` to your server and restart the container (see [DEPLOYMENT.md](DEPLOYMENT.md#restarting)).
 
-This will create a new `secrets/token.json` with valid credentials and refresh tokens.
+**Permanent fix — publish the app out of Testing:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services → OAuth consent screen**
+2. Click **Publish App**, then confirm
+3. You'll see a warning that the app needs verification if it requests sensitive/restricted scopes to more than 100 users — this doesn't apply here: `gmail.readonly` and `gmail.compose` are sensitive scopes, but Google only requires the formal verification process (which can take weeks) once you have real external users beyond yourself. For single-tenant personal use, publishing is enough; you'll just see an "unverified app" warning on first consent, which is expected and safe to click through since it's your own app and your own data
+4. Re-authorize once more after publishing: `python authorize.py`
+
+Once published, refresh tokens don't expire on a fixed schedule — they only die if unused for 6 months, or if you revoke access yourself. See the cron keep-alive below if you want a safeguard against that.
 
 ## Docker / Deployment Issues
 

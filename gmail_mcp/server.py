@@ -1,8 +1,37 @@
+import functools
+import logging
 import os
 
 from mcp.server.mcpserver import MCPServer
 
 from . import gmail_client
+
+logging.basicConfig(
+    level=os.environ.get("LOGLEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger("gmail_mcp")
+
+
+def _brief(kwargs: dict) -> dict:
+    return {
+        k: (v[:100] + "…" if isinstance(v, str) and len(v) > 100 else v)
+        for k, v in kwargs.items()
+    }
+
+
+def _logged(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        logger.info("tool_call name=%s args=%s", fn.__name__, _brief(kwargs))
+        try:
+            result = fn(*args, **kwargs)
+            logger.info("tool_ok name=%s", fn.__name__)
+            return result
+        except Exception:
+            logger.exception("tool_error name=%s", fn.__name__)
+            raise
+    return wrapper
 
 
 def _build_mcp() -> MCPServer:
@@ -31,24 +60,28 @@ mcp = _build_mcp()
 
 
 @mcp.tool()
+@_logged
 def gmail_search(query: str, max_results: int = 10) -> list[dict]:
     """Search Gmail messages using the Gmail search syntax (e.g. 'from:x@y.com is:unread')."""
     return gmail_client.search_messages(query, max_results)
 
 
 @mcp.tool()
+@_logged
 def gmail_get_message(message_id: str) -> dict:
     """Fetch a single Gmail message by id, including its plain-text body."""
     return gmail_client.get_message(message_id)
 
 
 @mcp.tool()
+@_logged
 def gmail_get_thread(thread_id: str) -> dict:
     """Fetch every message in a Gmail thread by thread id."""
     return gmail_client.get_thread(thread_id)
 
 
 @mcp.tool()
+@_logged
 def gmail_create_draft(
     to: str,
     subject: str,
@@ -71,6 +104,7 @@ def gmail_create_draft(
 
 
 @mcp.tool()
+@_logged
 def gmail_list_labels() -> list[dict]:
     """List all Gmail labels on the account."""
     return gmail_client.list_labels()
