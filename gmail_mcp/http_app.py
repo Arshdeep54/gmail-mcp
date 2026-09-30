@@ -21,7 +21,7 @@ app = mcp.streamable_http_app(transport_security=transport_security)
 async def health(request: Request) -> JSONResponse:
     """Confirms the Gmail token is valid and the API is reachable, not just that the process is up."""
     try:
-        gmail_client.get_service().users().getProfile(userId="me").execute()
+        gmail_client.get_service().users().getProfile(userId="me").execute(num_retries=3)
         return JSONResponse({"status": "ok"})
     except Exception as e:
         logger.exception("health_check_failed")

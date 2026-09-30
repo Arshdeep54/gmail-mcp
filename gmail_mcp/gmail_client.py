@@ -70,7 +70,7 @@ def search_messages(query: str, max_results: int = 10) -> list[dict[str, Any]]:
         service.users()
         .messages()
         .list(userId="me", q=query, maxResults=max_results)
-        .execute()
+        .execute(num_retries=3)
     )
     results = []
     for m in resp.get("messages", []):
@@ -83,7 +83,7 @@ def search_messages(query: str, max_results: int = 10) -> list[dict[str, Any]]:
                 format="metadata",
                 metadataHeaders=["Subject", "From", "To", "Cc", "Bcc", "Date"],
             )
-            .execute()
+            .execute(num_retries=3)
         )
         headers = msg["payload"]["headers"]
         results.append(
@@ -109,7 +109,7 @@ def get_message(message_id: str) -> dict[str, Any]:
         service.users()
         .messages()
         .get(userId="me", id=message_id, format="full")
-        .execute()
+        .execute(num_retries=3)
     )
     headers = msg["payload"]["headers"]
     body, body_html = _extract_bodies(msg["payload"])
@@ -132,7 +132,7 @@ def get_message(message_id: str) -> dict[str, Any]:
 
 def get_thread(thread_id: str) -> dict[str, Any]:
     service = get_service()
-    thread = service.users().threads().get(userId="me", id=thread_id, format="full").execute()
+    thread = service.users().threads().get(userId="me", id=thread_id, format="full").execute(num_retries=3)
     messages = []
     for msg in thread.get("messages", []):
         headers = msg["payload"]["headers"]
@@ -185,7 +185,7 @@ def create_draft(
                 format="metadata",
                 metadataHeaders=["Message-ID", "References"],
             )
-            .execute()
+            .execute(num_retries=3)
         )
         thread_id = original.get("threadId")
         headers = original["payload"]["headers"]
@@ -204,7 +204,7 @@ def create_draft(
     if thread_id:
         draft_body["message"]["threadId"] = thread_id
 
-    draft = service.users().drafts().create(userId="me", body=draft_body).execute()
+    draft = service.users().drafts().create(userId="me", body=draft_body).execute(num_retries=3)
     return {
         "draftId": draft["id"],
         "messageId": draft["message"]["id"],
@@ -214,10 +214,10 @@ def create_draft(
 
 def list_labels() -> list[dict[str, Any]]:
     service = get_service()
-    resp = service.users().labels().list(userId="me").execute()
+    resp = service.users().labels().list(userId="me").execute(num_retries=3)
     labels = []
     for l in resp.get("labels", []):
-        detail = service.users().labels().get(userId="me", id=l["id"]).execute()
+        detail = service.users().labels().get(userId="me", id=l["id"]).execute(num_retries=3)
         labels.append(
             {
                 "id": detail["id"],
