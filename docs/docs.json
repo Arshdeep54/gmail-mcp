@@ -39,7 +39,8 @@
       {
         "group": "Help",
         "pages": [
-          "troubleshooting"
+          "troubleshooting",
+          "privacy"
         ]
       }
     ]
