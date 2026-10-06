@@ -1,12 +1,12 @@
 {
-  "name": "gmail-mcp-server",
+  "name": "Hiesenbug Gmail MCP",
   "logo": {
     "light": "./logo.png",
     "dark": "./logo.png"
   },
   "favicon": "./logo.png",
   "og": {
-    "title": "gmail-mcp-server — Free Gmail for AI",
+    "title": "Hiesenbug Gmail MCP — Free Gmail for AI",
     "description": "Self-hosted Gmail MCP server. Works with Claude Code, ChatGPT, and more. Open source.",
     "image": "./og-image.png"
   },
